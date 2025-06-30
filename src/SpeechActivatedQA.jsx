@@ -18,7 +18,8 @@ const SpeechActivatedQA = () => {
         const res = await axios.get('http://localhost:5000/surveys', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSurveys(res.data);
+        console.log('Survey API response:', res.data); // (optional)
+        setSurveys(res.data.data); // ✅ correctly sets array
         setLoading(false);
       } catch (err) {
         console.error('Error fetching surveys:', err.message);
@@ -26,10 +27,12 @@ const SpeechActivatedQA = () => {
         setLoading(false);
       }
     };
+  
     if (isAuthenticated) {
       fetchSurveys();
     }
   }, [token, isAuthenticated]);
+  
 
   const handleSurveyClick = (surveyId) => {
     navigate(`/surveys/${surveyId}`); // FIXED
