@@ -40,6 +40,7 @@ const SurveyVoicePage = () => {
   useEffect(() => {
     if (!transcript || !survey) return;
     console.log(transcript)
+    console.log(transcript)
     const normalize = (text) =>
       text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 

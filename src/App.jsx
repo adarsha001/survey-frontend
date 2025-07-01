@@ -8,6 +8,7 @@ import Navbar from './components/Navbar'; // 👈 import navbar
 import MySurveyResponses from './components/MySurveyResponses';
 import QuestionDetailPage from './components/QuestionDetailPage';
 import SurveyPage from './components/SurveyPage';
+import SurveyForm from './SurveyForm';
 
 export default function App() {
   const handleQuizSubmit = (quizData) => {
@@ -25,7 +26,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/response" element={<MySurveyResponses />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<QuizForm onSubmit={handleQuizSubmit} />} />
+        <Route path="/" element={<SurveyForm onSubmit={handleQuizSubmit} />} />
         <Route path="/speech" element={<SpeechActivatedQA />} />
       </Routes>
     </div>

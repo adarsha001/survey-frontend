@@ -1,4 +1,3 @@
-// src/pages/SpeechActivatedQA.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -18,8 +17,8 @@ const SpeechActivatedQA = () => {
         const res = await axios.get('http://localhost:5000/surveys', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('Survey API response:', res.data); // (optional)
-        setSurveys(res.data.data); // ✅ correctly sets array
+        console.log('Survey API response:', res.data);
+        setSurveys(res.data.data); // Set surveys array
         setLoading(false);
       } catch (err) {
         console.error('Error fetching surveys:', err.message);
@@ -27,15 +26,14 @@ const SpeechActivatedQA = () => {
         setLoading(false);
       }
     };
-  
+
     if (isAuthenticated) {
       fetchSurveys();
     }
   }, [token, isAuthenticated]);
-  
 
   const handleSurveyClick = (surveyId) => {
-    navigate(`/surveys/${surveyId}`); // FIXED
+    navigate(`/surveys/${surveyId}`);
   };
 
   const filteredSurveys = surveys.filter(s =>
@@ -76,16 +74,27 @@ const SpeechActivatedQA = () => {
           {filteredSurveys.map(survey => (
             <div
               key={survey._id}
-              className="border rounded p-4 shadow cursor-pointer hover:border-blue-500 transition-colors"
+              className="border rounded shadow cursor-pointer hover:border-blue-500 transition-colors bg-white"
               onClick={() => handleSurveyClick(survey._id)}
             >
-              <h2 className="text-lg font-semibold mb-1">{survey.title}</h2>
-              <p className="text-sm text-gray-600 mb-2">
-                Created by: {survey.createdBy?.username || 'Unknown'}
-              </p>
-              <p className="text-sm text-gray-500">
-                {survey.questions.length} questions
-              </p>
+              {/* Cover Image */}
+              {survey.imageUrl && (
+                <img
+                  src={survey.imageUrl}
+                  alt="Survey Cover"
+                  className="w-full h-40 object-cover rounded-t"
+                />
+              )}
+
+              <div className="p-4">
+                <h2 className="text-lg font-semibold mb-1">{survey.title}</h2>
+                <p className="text-sm text-gray-600 mb-1">
+                  Created by: {survey.createdBy?.username || 'Unknown'}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {survey.questions.length} questions
+                </p>
+              </div>
             </div>
           ))}
         </div>
