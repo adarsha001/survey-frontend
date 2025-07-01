@@ -26,7 +26,7 @@ const QuestionDetailPage = () => {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/surveys/${surveyId}`);
+        const res = await axios.get(`https://survey-backend-vugm.onrender.com/surveys/${surveyId}`);
         setSurvey(res.data);
         const foundQuestion = res.data.questions.find(q => q._id === questionId);
         setQuestion(foundQuestion);

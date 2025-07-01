@@ -10,7 +10,7 @@ const MySurveyResponses = () => {
   useEffect(() => {
     const fetchResponses = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/surveys/all-responses');
+        const res = await axios.get('https://survey-backend-vugm.onrender.com/surveys/all-responses');
         setResponses(res.data.data);
       } catch (err) {
         setError('Failed to fetch responses.');

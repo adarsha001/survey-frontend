@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         try {
-          const response = await axios.get("http://localhost:5000/auth/me");
+          const response = await axios.get("https://survey-backend-vugm.onrender.com/auth/me");
           setToken(storedToken);
           setUser(response.data.user);
         } catch (err) {
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", serverToken);
     setToken(serverToken);
     try {
-      const response = await axios.get("http://localhost:5000/auth/me");
+      const response = await axios.get("https://survey-backend-vugm.onrender.com/auth/me");
       setUser(response.data.user);
     } catch (err) {
       console.error("Failed to fetch user after storing token", err);

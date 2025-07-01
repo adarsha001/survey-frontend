@@ -19,7 +19,7 @@ const Login = () => {
     setError("");
     
     try {
-      const res = await axios.post("http://localhost:5000/auth/login", user); // Updated endpoint
+      const res = await axios.post("https://survey-backend-vugm.onrender.com/auth/login", user); // Updated endpoint
       await storeToken(res.data.token) // Correct case here
       
       navigate("/");

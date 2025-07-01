@@ -24,7 +24,7 @@ const SurveyVoicePage = () => {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/surveys/${surveyId}`, {
+        const res = await axios.get(`https://survey-backend-vugm.onrender.com/surveys/${surveyId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSurvey(res.data.data || res.data);
@@ -88,7 +88,7 @@ const SurveyVoicePage = () => {
     };
 
     try {
-      await axios.post('http://localhost:5000/surveys/survey-responses', payload, {
+      await axios.post('https://survey-backend-vugm.onrender.com/surveys/survey-responses', payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert('Responses submitted successfully!');

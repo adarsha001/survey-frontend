@@ -14,7 +14,7 @@ const SpeechActivatedQA = () => {
   useEffect(() => {
     const fetchSurveys = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/surveys', {
+        const res = await axios.get('https://survey-backend-vugm.onrender.com/surveys', {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log('Survey API response:', res.data);

@@ -7,7 +7,7 @@ const SurveyStatsWithNames = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/surveys/response-stats');
+        const res = await axios.get('https://survey-backend-vugm.onrender.com/surveys/response-stats');
         setStats(res.data.data);
       } catch (err) {
         console.error('Failed to load response stats:', err);

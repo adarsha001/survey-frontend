@@ -11,7 +11,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/auth/register", user);
+      const res = await axios.post("https://survey-backend-vugm.onrender.com/auth/register", user);
       console.log("Registered:", res.data);
       alert("Registration successful!");
       navigate("/login");
