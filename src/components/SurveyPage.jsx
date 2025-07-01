@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useAuth } from '../context/Auth';
 
 const SurveyVoicePage = () => {
@@ -12,14 +11,10 @@ const SurveyVoicePage = () => {
   const [responses, setResponses] = useState({});
   const [introResponses, setIntroResponses] = useState({});
   const [unlockedQuestions, setUnlockedQuestions] = useState([]);
+  const [transcript, setTranscript] = useState('');
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
   const { token } = useAuth();
-
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechRecognition();
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -38,9 +33,36 @@ const SurveyVoicePage = () => {
   }, [surveyId, token, navigate]);
 
   useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.error('Speech recognition not supported');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcriptPiece = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcriptPiece + ' ';
+        }
+      }
+      setTranscript((prev) => prev + finalTranscript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Recognition error:', event.error);
+    };
+
+    recognitionRef.current = recognition;
+  }, []);
+
+  useEffect(() => {
     if (!transcript || !survey) return;
-    console.log(transcript)
-    console.log(transcript)
     const normalize = (text) =>
       text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 
@@ -59,10 +81,12 @@ const SurveyVoicePage = () => {
 
   const toggleListening = () => {
     if (listening) {
-      SpeechRecognition.stopListening();
-      resetTranscript();
+      recognitionRef.current?.stop();
+      setListening(false);
     } else {
-      SpeechRecognition.startListening({ continuous: true });
+      recognitionRef.current?.start();
+      setTranscript('');
+      setListening(true);
     }
   };
 
@@ -99,10 +123,6 @@ const SurveyVoicePage = () => {
     }
   };
 
-  if (!browserSupportsSpeechRecognition) {
-    return <div className="text-center text-red-600">Speech recognition not supported.</div>;
-  }
-
   if (loading) {
     return <div className="text-center p-6">Loading survey...</div>;
   }
@@ -119,7 +139,6 @@ const SurveyVoicePage = () => {
         {listening ? 'Stop Listening' : 'Start Listening'}
       </button>
 
-      {/* Intro Questions */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Intro Questions</h2>
         {survey.introQuestions?.map((q, idx) => (
@@ -135,7 +154,6 @@ const SurveyVoicePage = () => {
         ))}
       </div>
 
-      {/* Survey Questions */}
       <div>
         <h2 className="text-xl font-semibold mb-2">Survey Questions</h2>
         {survey.questions.map((q) => {
