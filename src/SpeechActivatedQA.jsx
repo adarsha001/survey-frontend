@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './context/auth'; // fixed relative path
+import { useAuth } from './context/Auth'; // fixed relative path
 
 const SpeechActivatedQA = () => {
   const [surveys, setSurveys] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './context/auth';
+import { useAuth } from './context/Auth';
 
 const API_URL = 'http://localhost:5000';
 

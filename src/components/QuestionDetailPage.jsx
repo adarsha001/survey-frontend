@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { useAuth } from '../context/auth';
+import { useAuth } from '../context/Auth';
 
 const QuestionDetailPage = () => {
   const { surveyId, questionId } = useParams();
