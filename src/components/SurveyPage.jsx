@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useAuth } from '../context/Auth';
 
 const SurveyVoicePage = () => {
@@ -13,40 +14,12 @@ const SurveyVoicePage = () => {
   const [unlockedQuestions, setUnlockedQuestions] = useState([]);
   const { token } = useAuth();
 
-  const [transcript, setTranscript] = useState('');
-  const [listening, setListening] = useState(false);
-  const recognitionRef = React.useRef(null);
-
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert("Speech recognition is not supported on this device.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = (event) => {
-      const lastResult = event.results[event.results.length - 1];
-      const text = lastResult[0].transcript;
-      setTranscript((prev) => prev + ' ' + text);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech Recognition Error:', event);
-    };
-
-    recognition.onend = () => {
-      setListening(false);
-    };
-
-    recognitionRef.current = recognition;
-  }, []);
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -66,7 +39,8 @@ const SurveyVoicePage = () => {
 
   useEffect(() => {
     if (!transcript || !survey) return;
-
+    console.log(transcript)
+    console.log(transcript)
     const normalize = (text) =>
       text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 
@@ -85,12 +59,10 @@ const SurveyVoicePage = () => {
 
   const toggleListening = () => {
     if (listening) {
-      recognitionRef.current?.stop();
-      setTranscript('');
-      setListening(false);
+      SpeechRecognition.stopListening();
+      resetTranscript();
     } else {
-      recognitionRef.current?.start();
-      setListening(true);
+      SpeechRecognition.startListening({ continuous: true });
     }
   };
 
@@ -126,6 +98,10 @@ const SurveyVoicePage = () => {
       alert('Submission failed.');
     }
   };
+
+  if (!browserSupportsSpeechRecognition) {
+    return <div className="text-center text-red-600">Speech recognition not supported.</div>;
+  }
 
   if (loading) {
     return <div className="text-center p-6">Loading survey...</div>;
