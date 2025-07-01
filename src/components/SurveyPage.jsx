@@ -14,6 +14,7 @@ const SurveyVoicePage = () => {
   const [transcript, setTranscript] = useState('');
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const isListeningRef = useRef(false);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -33,36 +34,8 @@ const SurveyVoicePage = () => {
   }, [surveyId, token, navigate]);
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.error('Speech recognition not supported');
-      return;
-    }
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    if (!survey || !transcript) return;
 
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcriptPiece = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcriptPiece + ' ';
-        }
-      }
-      setTranscript((prev) => prev + finalTranscript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Recognition error:', event.error);
-    };
-
-    recognitionRef.current = recognition;
-  }, []);
-
-  useEffect(() => {
-    if (!transcript || !survey) return;
     const normalize = (text) =>
       text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 
@@ -79,12 +52,62 @@ const SurveyVoicePage = () => {
     setUnlockedQuestions((prev) => [...new Set([...prev, ...unlockedIds])]);
   }, [transcript, survey]);
 
+  useEffect(() => {
+    if (!listening) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech Recognition not supported on this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false; // important for mobile
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += t + ' ';
+        }
+      }
+      setTranscript((prev) => prev + finalTranscript);
+    };
+
+    recognition.onend = () => {
+      if (isListeningRef.current) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (err) {
+            console.error('Restart error:', err);
+          }
+        }, 300);
+      }
+    };
+
+    recognition.onerror = (e) => {
+      console.error('Speech Recognition Error:', e);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+    };
+  }, [listening]);
+
   const toggleListening = () => {
     if (listening) {
+      isListeningRef.current = false;
       recognitionRef.current?.stop();
       setListening(false);
     } else {
-      recognitionRef.current?.start();
+      isListeningRef.current = true;
       setTranscript('');
       setListening(true);
     }
@@ -123,9 +146,7 @@ const SurveyVoicePage = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-center p-6">Loading survey...</div>;
-  }
+  if (loading) return <div className="text-center p-6">Loading survey...</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -157,27 +178,18 @@ const SurveyVoicePage = () => {
       <div>
         <h2 className="text-xl font-semibold mb-2">Survey Questions</h2>
         {survey.questions.map((q) => {
-          const renderQuestionTextWithHighlight = () => {
-            const words = q.questionText.split(' ');
-            const spokenWords = transcript.toLowerCase().split(' ');
-            return words.map((word, index) => {
-              const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, '');
-              const isHighlighted = spokenWords.includes(normalized);
-              return (
-                <span
-                  key={index}
-                  className={`px-1 rounded ${isHighlighted ? 'bg-yellow-300' : ''}`}
-                >
-                  {word}{' '}
-                </span>
-              );
-            });
-          };
-
+          const spokenWords = transcript.toLowerCase().split(' ');
+          const words = q.questionText.split(' ');
           return (
             <div key={q._id} className="mb-6 p-4 border rounded shadow">
               <div className="mb-2 font-medium text-gray-800 text-lg">
-                {renderQuestionTextWithHighlight()}
+                {words.map((word, index) => {
+                  const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  const isHighlighted = spokenWords.includes(normalized);
+                  return (
+                    <span key={index} className={`px-1 rounded ${isHighlighted ? 'bg-yellow-300' : ''}`}>{word} </span>
+                  );
+                })}
               </div>
 
               {!unlockedQuestions.includes(q._id) ? (
