@@ -185,7 +185,7 @@ const SurveyVoicePage = () => {
               <label className="block text-white mb-1">{q.questionText}</label>
               <input
                 type={q.fieldType || 'text'}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border text-black border-gray-300 rounded"
                 onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
                 required={q.required}
               />
