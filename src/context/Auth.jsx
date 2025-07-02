@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   // Axios interceptor to attach token to all requests
+  
   useEffect(() => {
     const requestInterceptor = axios.interceptors.request.use(config => {
       const storedToken = localStorage.getItem("token");

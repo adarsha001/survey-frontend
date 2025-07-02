@@ -8,7 +8,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   color: #333;
-  background-color: #f5f7fa;
+  background-color: #000000;
   margin: 0;
   padding: 0;
 }
@@ -287,4 +287,22 @@ button {
 .quiz-card p {
   color: #7f8c8d;
   margin-bottom: 0;
+}
+
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, #040a1b, #01255f, #0a1863, #0b35a0);
+  background-size: 300% 300%;
+  animation: gradient-move 8s ease infinite;
 }

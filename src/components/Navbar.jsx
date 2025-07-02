@@ -2,19 +2,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from "../context/Auth";
+import logo from '../../public/logo.png'; // ✅ Import logo
 
 export default function Navbar() {
   const { isAuthenticated, logout, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-600 text-white px-4 py-3">
+    <nav className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white px-4 py-3 shadow-md">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold">Survey App</h1>
+        {/* Logo + Title */}
+        <div className="flex items-center space-x-2">
+          <img src={logo} alt="Voice Survey Logo" className="w-8 h-8 rounded-full" />
+          <h1 className="text-xl font-bold">
+            <Link to="/" className="hover:underline">Voice Survey</Link>
+          </h1>
+        </div>
 
         {/* Hamburger Icon for Mobile */}
-        <button 
-          className="md:hidden" 
+        <button
+          className="md:hidden"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -27,7 +34,7 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-4 items-center">
-          <Link to="/" className="hover:underline">Quiz</Link>
+          <Link to="/surveyform" className="hover:underline">Quiz</Link>
           <Link to="/speech" className="hover:underline">Speech</Link>
           <Link to="/response" className="hover:underline">Responses</Link>
 
@@ -39,9 +46,9 @@ export default function Navbar() {
           ) : (
             <div className="flex items-center gap-4">
               <span className="font-medium">Welcome, {user?.username}</span>
-              <button 
-                onClick={logout} 
-                className="hover:underline bg-blue-700 px-3 py-1 rounded"
+              <button
+                onClick={logout}
+                className="hover:underline bg-gray-600 px-3 py-1 rounded"
               >
                 Logout
               </button>
@@ -53,7 +60,7 @@ export default function Navbar() {
       {/* Mobile Dropdown Menu */}
       {isOpen && (
         <div className="md:hidden mt-3 space-y-3">
-          <Link to="/" className="block hover:underline" onClick={() => setIsOpen(false)}>Quiz</Link>
+          <Link to="/surveyform" className="block hover:underline" onClick={() => setIsOpen(false)}>Quiz</Link>
           <Link to="/speech" className="block hover:underline" onClick={() => setIsOpen(false)}>Speech</Link>
           <Link to="/response" className="block hover:underline" onClick={() => setIsOpen(false)}>Responses</Link>
 
@@ -65,12 +72,12 @@ export default function Navbar() {
           ) : (
             <>
               <span className="block font-medium">Welcome, {user?.username}</span>
-              <button 
+              <button
                 onClick={() => {
                   logout();
                   setIsOpen(false);
                 }}
-                className="hover:underline bg-blue-700 px-3 py-1 rounded"
+                className="hover:underline bg-gray-600 px-3 py-1 rounded"
               >
                 Logout
               </button>

@@ -4,14 +4,18 @@ import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [user, setUser] = useState({ username: "", email: "", password: "" });
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
   const handleChange = (e) =>
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("https://survey-backend-vugm.onrender.com/auth/register", user);
+      const res = await axios.post(
+        "https://survey-backend-vugm.onrender.com/auth/register",
+        user
+      );
       console.log("Registered:", res.data);
       alert("Registration successful!");
       navigate("/login");
@@ -22,12 +26,12 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+<div className="h-screen w-full animate-gradient flex items-center justify-center text-white  ">
       <form
         onSubmit={handleRegister}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
+        className="bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-sm border border-gray-700"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+        <h2 className="text-2xl  mb-4 text-center">Register</h2>
 
         <input
           type="text"
@@ -35,17 +39,17 @@ const Register = () => {
           placeholder="Username"
           value={user.username}
           onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          className="w-full p-2 mb-3 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:border-blue-500"
           required
         />
 
         <input
-          type="text"
+          type="email"
           name="email"
           placeholder="Email"
           value={user.email}
           onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          className="w-full p-2 mb-3 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:border-blue-500"
           required
         />
 
@@ -55,16 +59,23 @@ const Register = () => {
           placeholder="Password"
           value={user.password}
           onChange={handleChange}
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-2 mb-4 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:border-blue-500"
           required
         />
 
         <button
           type="submit"
-          className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
+          className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded transition"
         >
           Register
         </button>
+
+        <p className="text-sm mt-4 text-center text-gray-400">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-400 hover:underline">
+            Login
+          </a>
+        </p>
       </form>
     </div>
   );
