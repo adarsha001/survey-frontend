@@ -8,9 +8,14 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <h1 className="text-4xl font-bold text-white mb-4">🎤 Voice Survey Platform</h1>
       <p className="text-lg text-gray-300 max-w-xl text-center mb-8">
-        Hi, I’m <span className="font-semibold text-blue-400">Adarsha</span> — a passionate full-stack web developer dedicated to building innovative solutions using modern technology.
-        This voice-activated survey platform was built with love to make data collection more interactive and accessible.
-      </p>
+  Hi, I’m <span className="font-semibold text-blue-400">Adarsha</span> — a passionate full-stack web developer dedicated to building innovative solutions using modern technology.
+  This voice-activated survey platform was built with love to make data collection more interactive and accessible.
+</p>
+
+<p className="text-md text-gray-300 max-w-xl text-center mb-8">
+  This platform allows users to take surveys using their voice. Questions are "unlocked" only after you speak them out loud, ensuring active participation and preventing skimming.
+  It's powered by modern speech recognition technology and designed to create a more immersive and accessible survey experience — ideal for education, research, and interactive feedback collection.
+</p>
 
       <div className="flex flex-col md:flex-row gap-4">
         <button
