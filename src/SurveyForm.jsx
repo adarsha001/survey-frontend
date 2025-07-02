@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './context/Auth';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://survey-backend-vugm.onrender.com';
 
 export default function SurveyForm() {
   const [title, setTitle] = useState('');
@@ -116,7 +116,7 @@ export default function SurveyForm() {
 
   return (
     <div className="min-h-screen w-full animate-gradient flex items-center justify-center text-white px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 sm:p-8 rounded-xl shadow-xl">
+      <div className="w-full max-w-3xl">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Create Survey</h1>
 
         {error && <div className="text-red-400 mb-4">{error}</div>}
