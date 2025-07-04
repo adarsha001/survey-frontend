@@ -168,6 +168,17 @@ const SurveyVoicePage = () => {
   return (
     <div className="min-h-screen w-full animate-gradient flex items-center justify-center text-white px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 sm:p-8 rounded-xl shadow-xl">
+    
+{survey.imageUrl && (
+  <div className="w-full flex justify-center mb-4">
+    <img
+      src={survey.imageUrl}
+      alt="Survey cover"
+      className="max-h-64 w-full object-contain rounded-lg shadow"
+    />
+  </div>
+)}
+
         <h1 className="text-2xl font-bold mb-2">{survey.title}</h1>
         <p className="text-white mb-4">{survey.description}</p>
 
