@@ -130,7 +130,7 @@ const CreatorSurveysPage = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">My Surveys</h1>
         <button
-          onClick={() => navigate('/survey/create')}
+          onClick={() => navigate('/surveyform')}
           className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white"
         >
           Create New Survey
@@ -162,7 +162,7 @@ const CreatorSurveysPage = () => {
           <h3 className="text-lg font-medium text-white mb-2">No surveys found</h3>
           <p className="text-gray-400">You haven't created any surveys yet.</p>
           <button
-            onClick={() => navigate('/survey/create')}
+            onClick={() => navigate('/surveyform')}
             className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
           >
             Create Your First Survey
