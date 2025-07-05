@@ -11,6 +11,8 @@ import SurveyPage from './components/SurveyPage';
 import SurveyForm from './SurveyForm';
 import HomePage from './components/HomePage';
 import Surveyresponse from './Surveyresponse';
+import CreatorSurveysPage from './components/CreatorSurveysPage';
+import EditSurveyPage from './components/EditSurveyPage';
 
 export default function App() {
   const handleQuizSubmit = (quizData) => {
@@ -21,6 +23,7 @@ export default function App() {
     <div>
       <Navbar /> {/* 👈 add navbar */}
       <Routes>
+      <Route path="/survey/edit/:id" element={<EditSurveyPage />} />
       // Add this route to your existing routes
       {/* <Route path="/surveys" element={<SpeechActivatedQA />} /> */}
       <Route path="/surveys/:surveyId" element={<SurveyPage />} />
@@ -31,6 +34,7 @@ export default function App() {
         <Route path="/surveyform" element={<SurveyForm onSubmit={handleQuizSubmit} />} />
         <Route path="/" element={<HomePage/>} />
         <Route path="/speech" element={<Surveyresponse />} />
+        <Route path="/my-surveys" element={<CreatorSurveysPage />} />
       </Routes>
     </div>
   );

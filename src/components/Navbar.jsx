@@ -34,9 +34,18 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-4 items-center">
-          <Link to="/surveyform" className="hover:underline">Quiz</Link>
-          <Link to="/speech" className="hover:underline">Speech</Link>
-          <Link to="/response" className="hover:underline">Responses</Link>
+          <Link to="/surveyform" className="hover:underline flex items-center gap-1">
+            📝 Create Survey
+          </Link>
+          <Link to="/speech" className="hover:underline flex items-center gap-1">
+            🎤 Take Survey
+          </Link>
+          <Link to="/response" className="hover:underline flex items-center gap-1">
+            📊 View Responses
+          </Link>
+          <Link to="/my-surveys" className="hover:underline flex items-center gap-1">
+            🧑‍💼 My Surveys
+          </Link>
 
           {!isAuthenticated ? (
             <>
@@ -60,9 +69,18 @@ export default function Navbar() {
       {/* Mobile Dropdown Menu */}
       {isOpen && (
         <div className="md:hidden mt-3 space-y-3">
-          <Link to="/surveyform" className="block hover:underline" onClick={() => setIsOpen(false)}>Quiz</Link>
-          <Link to="/speech" className="block hover:underline" onClick={() => setIsOpen(false)}>Speech</Link>
-          <Link to="/response" className="block hover:underline" onClick={() => setIsOpen(false)}>Responses</Link>
+          <Link to="/surveyform" className="block hover:underline" onClick={() => setIsOpen(false)}>
+            📝 Create Survey
+          </Link>
+          <Link to="/speech" className="block hover:underline" onClick={() => setIsOpen(false)}>
+            🎤 Take Survey
+          </Link>
+          <Link to="/response" className="block hover:underline" onClick={() => setIsOpen(false)}>
+            📊 View Responses
+          </Link>
+          <Link to="/my-surveys" className="block hover:underline" onClick={() => setIsOpen(false)}>
+            🧑‍💼 My Surveys
+          </Link>
 
           {!isAuthenticated ? (
             <>

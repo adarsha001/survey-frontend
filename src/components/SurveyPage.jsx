@@ -20,14 +20,16 @@ const SurveyVoicePage = () => {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
+        setLoading(true);
         const res = await axios.get(`https://survey-backend-vugm.onrender.com/surveys/${surveyId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSurvey(res.data.data || res.data);
-        setLoading(false);
       } catch (err) {
         console.error('Error fetching survey:', err.message);
         navigate('/');
+      } finally {
+        setLoading(false);
       }
     };
     fetchSurvey();
@@ -163,106 +165,184 @@ const SurveyVoicePage = () => {
     }
   };
 
-  if (loading) return <div className="text-center p-6">Loading survey...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400 mb-4"></div>
+          <p className="text-white text-lg font-medium">Loading survey...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full animate-gradient flex items-center justify-center text-white px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 sm:p-8 rounded-xl shadow-xl">
-    
-{survey.imageUrl && (
-  <div className="w-full flex justify-center mb-4">
-    <img
-      src={survey.imageUrl}
-      alt="Survey cover"
-      className="max-h-64 w-full object-contain rounded-lg shadow"
-    />
-  </div>
-)}
-
-        <h1 className="text-2xl font-bold mb-2">{survey.title}</h1>
-        <p className="text-white mb-4">{survey.description}</p>
-
-        <button
-          onClick={toggleListening}
-          className={`mb-6 px-4 py-2 rounded text-white font-semibold ${listening ? 'bg-red-600' : 'bg-green-600'}`}
-        >
-          {listening ? 'Stop Listening' : 'Start Listening'}
-        </button>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Intro Questions</h2>
-          {survey.introQuestions?.map((q, idx) => (
-            <div key={idx} className="mb-4">
-              <label className="block text-white mb-1">{q.questionText}</label>
-              <input
-                type={q.fieldType || 'text'}
-                className="w-full p-2 border text-black border-gray-300 rounded"
-                onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
-                required={q.required}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl p-6 sm:p-8 border border-gray-700">
+          {/* Survey Cover Image */}
+          {survey.imageUrl && (
+            <div className="w-full h-full flex justify-center mb-6">
+              <img
+                src={survey.imageUrl}
+                alt="Survey cover"
+                className="max-h-64 w-full object-cover rounded-lg shadow border border-gray-600"
               />
             </div>
-          ))}
-        </div>
+          )}
 
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Survey Questions</h2>
-          {survey.questions.map((q) => {
-            const spokenWords = transcript.toLowerCase().split(' ');
-            const words = q.questionText.split(' ');
-            const selectedOptions = responses[q._id] || [];
+          {/* Survey Title and Description */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-white mb-2">{survey.title}</h1>
+            {survey.description && (
+              <p className="text-gray-300">{survey.description}</p>
+            )}
+          </div>
 
-            return (
-              <div key={q._id} className="mb-6 p-4 border rounded shadow">
-                <div className="mb-2 font-medium text-white text-lg">
-                  {words.map((word, index) => {
-                    const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const isHighlighted = spokenWords.includes(normalized);
-                    return (
-                      <span key={index} className={`px-1 rounded ${isHighlighted ? 'bg-yellow-400' : ''}`}>{word} </span>
-                    );
-                  })}
-                </div>
-
-                {!unlockedQuestions.includes(q._id) ? (
-                  <div className="italic text-yellow">Speak the question to unlock</div>
-                ) : q.questionType === 'text' ? (
-                  <textarea
-                    rows={3}
-                    className="w-full p-2 border rounded border-black text-black"
-                    placeholder="Type your answer..."
-                    value={responses[q._id] || ''}
-                    onChange={(e) => handleOptionSelect(q._id, e.target.value)}
-                  />
-                ) : (
-                  q.options.map((opt, idx) => {
-                    const selected = q.questionType === 'checkbox'
-                      ? selectedOptions.includes(opt)
-                      : responses[q._id] === opt;
-
-                    return (
-                      <div
-                        key={idx}
-                        className={`p-2 border rounded mb-2 cursor-pointer ${
-                          selected ? 'bg-green-700 border-blue-400' : 'border-gray-300 bg-white font-black text-stone-900'
-                        }`}
-                        onClick={() => handleOptionSelect(q._id, opt, q.questionType)}
-                      >
-                        {opt}
-                      </div>
-                    );
-                  })
-                )}
+          {/* Voice Control Section */}
+          <div className="mb-8 flex flex-col items-center">
+            <button
+              onClick={toggleListening}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                listening 
+                  ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20' 
+                  : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+              } shadow-lg`}
+            >
+              {listening ? (
+                <span className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                  Stop Listening
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                  Start Listening
+                </span>
+              )}
+            </button>
+            {transcript && (
+              <div className="mt-4 p-4 bg-gray-700/50 rounded-lg w-full">
+                <p className="text-sm text-gray-300 mb-1">Voice input:</p>
+                <p className="text-blue-300">{transcript}</p>
               </div>
-            );
-          })}
-        </div>
+            )}
+          </div>
 
-        <button
-          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={handleSubmit}
-        >
-          Submit Survey
-        </button>
+          {/* Intro Questions Section */}
+          <div className="mb-10">
+            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">Intro Questions</h2>
+            <div className="space-y-4">
+              {survey.introQuestions?.map((q, idx) => (
+                <div key={idx} className="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
+                  <label className="block text-gray-300 mb-2 font-medium">
+                    {q.questionText}
+                    {q.required && <span className="text-red-400 ml-1">*</span>}
+                  </label>
+                  <input
+                    type={q.fieldType || 'text'}
+                    className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-white"
+                    onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
+                    required={q.required}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Survey Questions Section */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">Survey Questions</h2>
+            <div className="space-y-6">
+              {survey.questions.map((q) => {
+                const spokenWords = transcript.toLowerCase().split(' ');
+                const words = q.questionText.split(' ');
+                const selectedOptions = responses[q._id] || [];
+
+                return (
+                  <div 
+                    key={q._id} 
+                    className={`bg-gray-700/30 p-5 rounded-xl border transition-all ${
+                      unlockedQuestions.includes(q._id) 
+                        ? 'border-blue-500/30 hover:border-blue-500/50' 
+                        : 'border-gray-600'
+                    }`}
+                  >
+                    <div className="mb-4">
+                      <h3 className="text-lg font-medium text-white">
+                        {words.map((word, index) => {
+                          const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, '');
+                          const isHighlighted = spokenWords.includes(normalized);
+                          return (
+                            <span 
+                              key={index} 
+                              className={`px-1 rounded transition-all ${
+                                isHighlighted ? 'bg-yellow-400/80 text-gray-900' : ''
+                              }`}
+                            >
+                              {word}{' '}
+                            </span>
+                          );
+                        })}
+                      </h3>
+                    </div>
+
+                    {!unlockedQuestions.includes(q._id) ? (
+                      <div className="text-center py-4 bg-gray-800/50 rounded-lg">
+                        <p className="text-yellow-400 italic">Speak the question to unlock</p>
+                      </div>
+                    ) : q.questionType === 'text' ? (
+                      <textarea
+                        rows={3}
+                        className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-white"
+                        placeholder="Type your answer..."
+                        value={responses[q._id] || ''}
+                        onChange={(e) => handleOptionSelect(q._id, e.target.value)}
+                      />
+                    ) : (
+                      <div className="space-y-2">
+                        {q.options.map((opt, idx) => {
+                          const selected = q.questionType === 'checkbox'
+                            ? selectedOptions.includes(opt)
+                            : responses[q._id] === opt;
+
+                          return (
+                            <div
+                              key={idx}
+                              className={`p-3 rounded-lg cursor-pointer transition-all ${
+                                selected
+                                  ? 'bg-blue-600 border-blue-400 text-white'
+                                  : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'
+                              } border`}
+                              onClick={() => handleOptionSelect(q._id, opt, q.questionType)}
+                            >
+                              {opt}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
+            <button
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-lg text-white font-medium shadow-lg hover:shadow-blue-500/20 transition-all"
+              onClick={handleSubmit}
+            >
+              Submit Survey
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
