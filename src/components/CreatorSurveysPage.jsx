@@ -176,6 +176,16 @@ const CreatorSurveysPage = () => {
               className="p-6 border border-gray-700 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors"
             >
               <h2 className="text-xl font-semibold mb-2 truncate">{survey.title}</h2>
+              {survey.imageUrl && (
+    <div className="mb-4">
+      <img
+        src={survey.imageUrl}
+        alt="Survey Cover"
+        className="w-full h-40 object-cover rounded-lg border border-gray-700"
+      />
+    </div>
+  )}
+
               <p className="text-gray-400 text-sm mb-4 line-clamp-2">
                 {survey.description || 'No description'}
               </p>

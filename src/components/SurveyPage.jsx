@@ -160,7 +160,7 @@ const SurveyVoicePage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert('Responses submitted successfully!');
-      navigate('/surveys');
+      navigate('/speech');
     } catch (error) {
       console.error('Error submitting survey:', error);
       alert('Submission failed.');

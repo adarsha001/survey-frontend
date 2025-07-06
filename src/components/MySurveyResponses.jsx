@@ -7,7 +7,7 @@ const MySurveyResponses = () => {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { token } = useAuth();
+  const { token,isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -30,6 +30,23 @@ const MySurveyResponses = () => {
 
     if (token) fetchResponses();
   }, [token]);
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center p-6 bg-gray-800 rounded-lg max-w-md">
+          <h2 className="text-xl font-bold text-white mb-4">Authentication Required</h2>
+          <p className="text-gray-300 mb-4">Please login to view your surveys</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
 
   if (loading) {
     return (

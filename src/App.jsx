@@ -1,10 +1,8 @@
 import React from 'react';
-// import QuizForm from './QuizForm';
-// import SpeechActivatedQA from './SpeechActivatedQA';
 import { Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
-import Navbar from './components/Navbar'; // 👈 import navbar
+import Navbar from './components/Navbar';
 import MySurveyResponses from './components/MySurveyResponses';
 import QuestionDetailPage from './components/QuestionDetailPage';
 import SurveyPage from './components/SurveyPage';
@@ -13,6 +11,8 @@ import HomePage from './components/HomePage';
 import Surveyresponse from './Surveyresponse';
 import CreatorSurveysPage from './components/CreatorSurveysPage';
 import EditSurveyPage from './components/EditSurveyPage';
+import PublicRoute from './components/PublicRoute'; // 👈 import it
+import NotFound from './components/NotFound';
 
 export default function App() {
   const handleQuizSubmit = (quizData) => {
@@ -21,20 +21,36 @@ export default function App() {
 
   return (
     <div>
-      <Navbar /> {/* 👈 add navbar */}
+      <Navbar />
       <Routes>
-      <Route path="/survey/edit/:id" element={<EditSurveyPage />} />
-      // Add this route to your existing routes
-      {/* <Route path="/surveys" element={<SpeechActivatedQA />} /> */}
-      <Route path="/surveys/:surveyId" element={<SurveyPage />} />
-      <Route path="/surveys/:surveyId/question/:questionId" element={<QuestionDetailPage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/survey/edit/:id" element={<EditSurveyPage />} />
+        <Route path="/surveys/:surveyId" element={<SurveyPage />} />
+        <Route path="/surveys/:surveyId/question/:questionId" element={<QuestionDetailPage />} />
+        
+        {/* 👇 wrap login and register in PublicRoute */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
         <Route path="/response" element={<MySurveyResponses />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/surveyform" element={<SurveyForm onSubmit={handleQuizSubmit} />} />
-        <Route path="/" element={<HomePage/>} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/speech" element={<Surveyresponse />} />
         <Route path="/my-surveys" element={<CreatorSurveysPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

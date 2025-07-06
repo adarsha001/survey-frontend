@@ -34,6 +34,22 @@ const Surveyresponse = () => {
       setLoading(false);
     }
   }, [token, isAuthenticated]);
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center p-6 bg-gray-800 rounded-lg max-w-md">
+          <h2 className="text-xl font-bold text-white mb-4">Authentication Required</h2>
+          <p className="text-gray-300 mb-4">Please login to view your surveys</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const navigate = useNavigate();
 
@@ -74,13 +90,6 @@ const Surveyresponse = () => {
             </p>
           </div>
 
-          {user && (
-            <div className="mb-6 text-center">
-              <p className="text-gray-400">
-                Welcome back, <span className="text-blue-300">{user.username}</span>
-              </p>
-            </div>
-          )}
 
           <div className="mb-8">
             <input
@@ -151,17 +160,7 @@ const Surveyresponse = () => {
       </div>
 
       {/* Login Overlay */}
-      {!isAuthenticated && (
-        <div className="fixed inset-0 bg-black/80 flex flex-col justify-center items-center z-10 p-4">
-          <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 max-w-md w-full p-8">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">Access Required</h2>
-              <p className="text-gray-400">Please log in to view and participate in surveys</p>
-            </div>
-            <Login />
-          </div>
-        </div>
-      )}
+     
     </div>
   );
 };
