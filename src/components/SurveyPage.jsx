@@ -199,8 +199,8 @@ const SurveyVoicePage = () => {
             {survey.description && (
               <p className="text-gray-300">{survey.description}</p>
             )}
-          </div>
-<div><CopySurveyLink surveyId={survey._id} /></div>
+          </div >
+<div className='pb-8'><CopySurveyLink surveyId={survey._id} /></div>
           {/* Voice Control Section */}
           <div className="mb-8 flex flex-col items-center">
             <button
