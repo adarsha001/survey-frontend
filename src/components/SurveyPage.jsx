@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/Auth';
+import CopySurveyLink from './CopySurveyLink';
 
 const SurveyVoicePage = () => {
   const { surveyId } = useParams();
@@ -25,6 +26,7 @@ const SurveyVoicePage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSurvey(res.data.data || res.data);
+        console.log(res.data)
       } catch (err) {
         console.error('Error fetching survey:', err.message);
         navigate('/');
@@ -198,7 +200,7 @@ const SurveyVoicePage = () => {
               <p className="text-gray-300">{survey.description}</p>
             )}
           </div>
-
+<div><CopySurveyLink surveyId={survey._id} /></div>
           {/* Voice Control Section */}
           <div className="mb-8 flex flex-col items-center">
             <button

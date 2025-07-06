@@ -19,6 +19,7 @@ const Surveyresponse = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSurveys(res.data.data);
+        console.log(res.data.data)
       } catch (err) {
         console.error('Error fetching surveys:', err.message);
         setError('Failed to load surveys');

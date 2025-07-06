@@ -90,16 +90,18 @@ const handleAddIntroQuestion = () => {
     const fetchSurvey = async () => {
       if (mode !== 'edit' || !id) return;
       try {
+        console.log('mode:', mode, 'id:', id);
         const res = await axios.get(`${API_URL}/surveys/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = res.data?.data;
+        const data = res.data
+        console.log(res.data)
         if (data) {
           setTitle(data.title || '');
           setDescription(data.description || '');
           setQuestions(data.questions || []);
           setIntroQuestions(data.introQuestions || []);
-          if (data.mediaUrl) setImagePreviewUrl(data.mediaUrl);
+          if (data.imageUrl) setImagePreviewUrl(data.imageUrl || data.mediaUrl || '');
         }
       } catch (err) {
         console.error('Failed to load survey for edit:', err);

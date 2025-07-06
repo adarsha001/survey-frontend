@@ -94,7 +94,7 @@ const CreatorSurveysPage = () => {
   };
 
   const handleViewResponses = (id) => {
-    navigate(`/survey/responses/${id}`);
+    navigate(`/response`);
   };
 
   if (!isAuthenticated) {
