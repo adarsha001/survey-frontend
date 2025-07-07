@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/Auth';
 import SurveyStatsWithNames from './SurveyStats';
+import { useNavigate } from 'react-router-dom';
 
 const MySurveyResponses = () => {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { token,isAuthenticated } = useAuth();
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchResponses = async () => {
       try {

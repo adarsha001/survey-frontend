@@ -10,7 +10,7 @@ const Surveyresponse = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isAuthenticated, user, token } = useAuth();
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchSurveys = async () => {
       try {
@@ -51,7 +51,7 @@ const Surveyresponse = () => {
     );
   }
 
-  const navigate = useNavigate();
+
 
   const handleSurveyClick = (id) => {
     if (!isAuthenticated) return;
