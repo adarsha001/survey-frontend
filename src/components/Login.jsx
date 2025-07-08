@@ -1,4 +1,3 @@
-// src/components/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +7,7 @@ const Login = () => {
   const [user, setUser] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
   const navigate = useNavigate();
   const { storeToken } = useAuth();
 
@@ -35,7 +35,7 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full animate-gradient flex items-center justify-center text-white  ">
+    <div className="h-screen w-full animate-gradient flex items-center justify-center text-white">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm bg-gray-900 text-white p-6 rounded-xl shadow-lg border border-gray-700"
@@ -58,16 +58,26 @@ const Login = () => {
           required
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={user.password}
-          onChange={handleChange}
-          className="w-full p-2 mb-4 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:border-blue-500"
-          required
-          minLength="6"
-        />
+        {/* 👁️ Password Field with Toggle */}
+        <div className="relative mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={user.password}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:border-blue-500"
+            required
+            minLength="6"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2 top-2 text-gray-400 hover:text-white text-sm"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
 
         <button
           type="submit"
