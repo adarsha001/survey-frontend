@@ -16,7 +16,7 @@ const SurveyVoicePage = () => {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
   const isListeningRef = useRef(false);
-  const { token } = useAuth();
+  const { token,isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -166,7 +166,22 @@ const SurveyVoicePage = () => {
       alert('Submission failed.');
     }
   };
-
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center p-6 bg-gray-800 rounded-lg max-w-md">
+          <h2 className="text-xl font-bold text-white mb-4">Authentication Required</h2>
+          <p className="text-gray-300 mb-4">Please login to view your surveys</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">

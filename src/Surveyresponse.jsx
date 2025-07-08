@@ -15,9 +15,7 @@ const Surveyresponse = () => {
     const fetchSurveys = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('https://survey-backend-vugm.onrender.com/surveys', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get('https://survey-backend-vugm.onrender.com/surveys');
         setSurveys(res.data.data);
         console.log(res.data.data)
       } catch (err) {
@@ -27,34 +25,16 @@ const Surveyresponse = () => {
         setLoading(false);
       }
     };
+    fetchSurveys();
 
-    if (isAuthenticated) {
-      fetchSurveys();
-    } else {
-      setLoading(false);
-    }
-  }, [token, isAuthenticated]);
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center p-6 bg-gray-800 rounded-lg max-w-md">
-          <h2 className="text-xl font-bold text-white mb-4">Authentication Required</h2>
-          <p className="text-gray-300 mb-4">Please login to view your surveys</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
+   
+  }, []);
+
 
 
 
   const handleSurveyClick = (id) => {
-    if (!isAuthenticated) return;
+    // if (!isAuthenticated) return;
     navigate(`/surveys/${id}`);
   };
 
@@ -65,7 +45,7 @@ const Surveyresponse = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400 mb-4"></div>
           <p className="text-white text-lg font-medium">Loading surveys...</p>
@@ -73,11 +53,12 @@ const Surveyresponse = () => {
       </div>
     );
   }
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Main Content */}
-      <div className={`${!isAuthenticated ? 'blur-sm pointer-events-none select-none' : ''}`}>
+      <div >
         <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold text-white sm:text-5xl mb-3">
@@ -98,7 +79,7 @@ const Surveyresponse = () => {
               placeholder="Search by title or creator..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              disabled={!isAuthenticated}
+              // disabled={!isAuthenticated}
             />
           </div>
 
@@ -159,7 +140,7 @@ const Surveyresponse = () => {
         </div>
       </div>
 
-      {/* Login Overlay */}
+
      
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Surveyresponse from '../Surveyresponse';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,13 @@ const HomePage = () => {
         </button>
       </div>
 
+
+   {/* Full Width Survey List with Padding and Rounded Corners */}
+<div className="px-4 sm:px-6 lg:px-8 py-10">
+<div className="bg-gray-900/40 rounded-2xl shadow-xl border border-gray-700 p-6">
+    <Surveyresponse />
+  </div>
+</div>
       <footer className="mt-12 text-sm text-gray-400">
         © {new Date().getFullYear()} Adarsha | Built with React & Voice Tech
       </footer>
