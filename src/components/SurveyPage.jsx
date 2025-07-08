@@ -202,6 +202,28 @@ const SurveyVoicePage = () => {
           </div >
 <div className='pb-8'><CopySurveyLink surveyId={survey._id} /></div>
           {/* Voice Control Section */}
+    
+
+          {/* Intro Questions Section */}
+          <div className="mb-10">
+            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">Intro Questions</h2>
+            <div className="space-y-4">
+              {survey.introQuestions?.map((q, idx) => (
+                <div key={idx} className="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
+                  <label className="block text-gray-300 mb-2 font-medium">
+                    {q.questionText}
+                    {q.required && <span className="text-red-400 ml-1">*</span>}
+                  </label>
+                  <input
+                    type={q.fieldType || 'text'}
+                    className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-white"
+                    onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
+                    required={q.required}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="mb-8 flex flex-col items-center">
             <button
               onClick={toggleListening}
@@ -235,28 +257,6 @@ const SurveyVoicePage = () => {
               </div>
             )}
           </div>
-
-          {/* Intro Questions Section */}
-          <div className="mb-10">
-            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">Intro Questions</h2>
-            <div className="space-y-4">
-              {survey.introQuestions?.map((q, idx) => (
-                <div key={idx} className="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
-                  <label className="block text-gray-300 mb-2 font-medium">
-                    {q.questionText}
-                    {q.required && <span className="text-red-400 ml-1">*</span>}
-                  </label>
-                  <input
-                    type={q.fieldType || 'text'}
-                    className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-white"
-                    onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
-                    required={q.required}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Survey Questions Section */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">Survey Questions</h2>
