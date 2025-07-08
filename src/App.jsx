@@ -13,6 +13,7 @@ import CreatorSurveysPage from './components/CreatorSurveysPage';
 import EditSurveyPage from './components/EditSurveyPage';
 import PublicRoute from './components/PublicRoute'; // 👈 import it
 import NotFound from './components/NotFound';
+import MarqueeWarning from './components/MarqueeWarning';
 
 export default function App() {
   const handleQuizSubmit = (quizData) => {
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <div>
       <Navbar />
+      <MarqueeWarning/>
       <Routes>
         <Route path="/survey/edit/:id" element={<EditSurveyPage />} />
         <Route path="/surveys/:surveyId" element={<SurveyPage />} />
