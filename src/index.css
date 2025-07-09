@@ -320,3 +320,16 @@ button {
   animation: slow-marquee 60s linear infinite;
   display: inline-block;
 }
+@keyframes slow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-slow-marquee {
+  animation: slow-marquee 60s linear infinite;
+  display: inline-block;
+}
