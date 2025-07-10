@@ -333,3 +333,9 @@ button {
   animation: slow-marquee 60s linear infinite;
   display: inline-block;
 }
+
+
+slow-marquee {
+  animation: slow-marquee 60s linear infinite;
+  display: inline-block;
+} 
