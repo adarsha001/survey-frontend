@@ -1,351 +1,260 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from './context/Auth';
+import { useAuth } from '../context/Auth';
 
-const API_URL = 'https://survey-backend-4gdj.onrender.com';
-
-export default function SurveyForm() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [questions, setQuestions] = useState([
-    { questionText: '', questionType: 'radio', options: ['', ''] }
-  ]);
-  const [introQuestions, setIntroQuestions] = useState([
-    { questionText: '', fieldType: 'text', required: true, options: [] }
-  ]);
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [optionError, setOptionError] = useState('');
+const SurveyVoicePage = () => {
+  const { surveyId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, token } = useAuth();
+  const [survey, setSurvey] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [responses, setResponses] = useState({});
+  const [introResponses, setIntroResponses] = useState({});
+  const [unlockedQuestions, setUnlockedQuestions] = useState([]);
+  const [transcript, setTranscript] = useState('');
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const isListeningRef = useRef(false);
+  const { token } = useAuth();
 
-  const handleAddQuestion = () => {
-    setQuestions([...questions, { questionText: '', questionType: 'radio', options: ['', ''] }]);
-  };
+  useEffect(() => {
+    const fetchSurvey = async () => {
+      try {
+        const res = await axios.get(`https://survey-backend-4gdj.onrender.com/surveys/${surveyId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSurvey(res.data.data || res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching survey:', err.message);
+        navigate('/');
+      }
+    };
+    fetchSurvey();
+  }, [surveyId, token, navigate]);
 
-  const handleAddIntroQuestion = () => {
-    setIntroQuestions([...introQuestions, { questionText: '', fieldType: 'text', required: true, options: [] }]);
-  };
+  useEffect(() => {
+    if (!survey || !transcript) return;
 
-  const handleTypeChange = (index, type) => {
-    const newQuestions = [...questions];
-    newQuestions[index].questionType = type;
-    newQuestions[index].options = type === 'text' ? [] : ['', '', ...(type === 'checkbox' ? [''] : [])];
-    setQuestions(newQuestions);
-  };
+    const normalize = (text) =>
+      text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 
-  const handleIntroTypeChange = (index, type) => {
-    const updated = [...introQuestions];
-    updated[index].fieldType = type;
-    if (type !== 'select') updated[index].options = [];
-    setIntroQuestions(updated);
-  };
+    const spoken = normalize(transcript);
 
-  const handleOptionChange = (qIndex, oIndex, value) => {
-    const updated = [...questions];
-    updated[qIndex].options[oIndex] = value;
-    setQuestions(updated);
-  };
+    const unlocked = survey.questions.filter((q) => {
+      const qText = normalize(q.questionText);
+      const qWords = qText.split(' ');
+      const matchCount = qWords.filter((word) => spoken.includes(word)).length;
+      return matchCount / qWords.length >= 0.8;
+    });
 
-  const handleIntroOptionChange = (qIndex, oIndex, value) => {
-    const updated = [...introQuestions];
-    updated[qIndex].options[oIndex] = value;
-    setIntroQuestions(updated);
-  };
+    const unlockedIds = unlocked.map((q) => q._id);
+    setUnlockedQuestions((prev) => [...new Set([...prev, ...unlockedIds])]);
+  }, [transcript, survey]);
 
-  const handleOptionDelete = (qIndex, oIndex) => {
-    const updated = [...questions];
-    const question = updated[qIndex];
-    const min = question.questionType === 'radio' ? 2 : 3;
-    if (question.options.length > min) {
-      question.options.splice(oIndex, 1);
-      setQuestions(updated);
-      setOptionError('');
-    } else {
-      setOptionError(`At least ${min} options required for ${question.questionType} type`);
-    }
-  };
+  useEffect(() => {
+    if (!listening) return;
 
-  const handleIntroOptionDelete = (qIndex, oIndex) => {
-    const updated = [...introQuestions];
-    updated[qIndex].options.splice(oIndex, 1);
-    setIntroQuestions(updated);
-  };
-
-  const handleImageChange = (e) => setImage(e.target.files[0]);
-
-  const handleSubmit = async () => {
-    if (!isAuthenticated) {
-      setError('Please login to create surveys');
-      navigate('/login');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech Recognition not supported on this browser.');
       return;
     }
 
-    setLoading(true);
-    setError('');
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
 
-    try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('questions', JSON.stringify(questions));
-      formData.append('introQuestions', JSON.stringify(introQuestions));
-      if (image) formData.append('image', image);
-
-      await axios.post(`${API_URL}/surveys/create-survey`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += t + ' ';
         }
-      });
-
-      navigate('/speech');
-    } catch (err) {
-      console.error('Survey creation failed:', err);
-      setError(err.response?.data?.message || 'Failed to create survey');
-      if (err.response?.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login');
       }
-    } finally {
-      setLoading(false);
+      setTranscript((prev) => prev + finalTranscript);
+    };
+
+    recognition.onend = () => {
+      if (isListeningRef.current) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (err) {
+            console.error('Restart error:', err);
+          }
+        }, 300);
+      }
+    };
+
+    recognition.onerror = (e) => {
+      console.error('Speech Recognition Error:', e);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+    };
+  }, [listening]);
+
+  const toggleListening = () => {
+    if (listening) {
+      isListeningRef.current = false;
+      recognitionRef.current?.stop();
+      setListening(false);
+    } else {
+      isListeningRef.current = true;
+      setTranscript('');
+      setListening(true);
     }
   };
 
+  const handleOptionSelect = (questionId, value, type) => {
+    setResponses((prev) => {
+      if (type === 'checkbox') {
+        const prevAnswers = prev[questionId] || [];
+        if (prevAnswers.includes(value)) {
+          return {
+            ...prev,
+            [questionId]: prevAnswers.filter((v) => v !== value),
+          };
+        } else {
+          return {
+            ...prev,
+            [questionId]: [...prevAnswers, value],
+          };
+        }
+      } else {
+        return { ...prev, [questionId]: value };
+      }
+    });
+  };
+
+  const handleIntroChange = (key, value) => {
+    setIntroResponses((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubmit = async () => {
+    const payload = {
+      introResponses: Object.entries(introResponses).map(([key, value]) => ({
+        questionText: key,
+        answer: value,
+      })),
+      responses: Object.entries(responses).map(([questionId, userAnswer]) => ({
+        surveyId,
+        questionId,
+        userAnswer,
+      })),
+    };
+
+    try {
+      await axios.post('https://survey-backend-4gdj.onrender.com/surveys/survey-responses', payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Responses submitted successfully!');
+      navigate('/surveys');
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      alert('Submission failed.');
+    }
+  };
+
+  if (loading) return <div className="text-center p-6">Loading survey...</div>;
+
   return (
     <div className="min-h-screen w-full animate-gradient flex items-center justify-center text-white px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-3xl">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Create Survey</h1>
-
-        {error && <div className="text-red-400 mb-4">{error}</div>}
-        {optionError && <div className="text-yellow-400 mb-4">{optionError}</div>}
-
-        <input
-          type="text"
-          placeholder="Survey Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 sm:p-2 mb-4 rounded bg-gray-800 border border-gray-700 focus:outline-none"
-          disabled={loading}
-        />
-
-        <textarea
-          placeholder="Survey Description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-3 sm:p-2 mb-4 rounded bg-gray-800 border border-gray-700 focus:outline-none"
-          disabled={loading}
-        />
-
-        <label className="block mb-2 font-medium">Cover Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="w-full mb-2"
-          disabled={loading}
-        />
-
-        {image && (
-          <div className="mb-6">
-            <img
-              src={URL.createObjectURL(image)}
-              alt="Preview"
-              className="w-full h-auto max-h-60 object-cover rounded shadow mb-2"
-            />
-            <button
-              type="button"
-              onClick={() => setImage(null)}
-              className="text-sm text-red-500 hover:underline"
-            >
-              Remove Image
-            </button>
-          </div>
-        )}
-
-        {/* Intro Questions */}
-        <h2 className="text-xl font-semibold mb-2">Intro Questions</h2>
-        {introQuestions.map((q, idx) => (
-          <div key={idx} className="mb-4 border border-gray-700 p-3 rounded bg-gray-800">
-            <input
-              type="text"
-              placeholder="Question Text"
-              value={q.questionText}
-              onChange={(e) => {
-                const updated = [...introQuestions];
-                updated[idx].questionText = e.target.value;
-                setIntroQuestions(updated);
-              }}
-              className="w-full p-2 mb-2 rounded bg-gray-900 border border-gray-600"
-            />
-
-            <select
-              value={q.fieldType}
-              onChange={(e) => handleIntroTypeChange(idx, e.target.value)}
-              className="w-full p-2 mb-2 rounded bg-gray-900 border border-gray-600"
-            >
-              <option value="text">Text</option>
-              <option value="number">Number</option>
-              <option value="email">Email</option>
-              <option value="date">Date</option>
-              <option value="select">Dropdown</option>
-            </select>
-
-            {q.fieldType === 'select' && (
-              <>
-                {q.options.map((opt, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                    <input
-                      type="text"
-                      placeholder={`Option ${i + 1}`}
-                      value={opt}
-                      onChange={(e) => handleIntroOptionChange(idx, i, e.target.value)}
-                      className="w-full p-2 rounded bg-gray-900 border border-gray-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleIntroOptionDelete(idx, i)}
-                      className="text-red-400 text-sm"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-                {q.options.length < 5 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = [...introQuestions];
-                      updated[idx].options.push('');
-                      setIntroQuestions(updated);
-                    }}
-                    className="text-blue-400 text-sm mt-1"
-                  >
-                    + Add Option
-                  </button>
-                )}
-              </>
-            )}
-
-            <button
-              type="button"
-              className="text-red-500 text-sm mt-2"
-              onClick={() => {
-                const updated = [...introQuestions];
-                updated.splice(idx, 1);
-                setIntroQuestions(updated);
-              }}
-            >
-              Delete Intro Question
-            </button>
-          </div>
-        ))}
+      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 sm:p-8 rounded-xl shadow-xl">
+        <h1 className="text-2xl font-bold mb-2">{survey.title}</h1>
+        <p className="text-white mb-4">{survey.description}</p>
 
         <button
-          type="button"
-          onClick={handleAddIntroQuestion}
-          className="mb-6 text-sm text-blue-400"
+          onClick={toggleListening}
+          className={`mb-6 px-4 py-2 rounded text-white font-semibold ${listening ? 'bg-red-600' : 'bg-green-600'}`}
         >
-          + Add Intro Question
+          {listening ? 'Stop Listening' : 'Start Listening'}
         </button>
 
-        {/* Main Questions */}
-        <h2 className="text-xl font-semibold mb-2">Survey Questions</h2>
-        {questions.map((q, idx) => (
-          <div key={idx} className="mb-4 border border-gray-700 p-3 rounded bg-gray-800">
-            <input
-              type="text"
-              placeholder="Question Text"
-              value={q.questionText}
-              onChange={(e) => {
-                const updated = [...questions];
-                updated[idx].questionText = e.target.value;
-                setQuestions(updated);
-              }}
-              className="w-full p-2 mb-2 rounded bg-gray-900 border border-gray-600"
-            />
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">Intro Questions</h2>
+          {survey.introQuestions?.map((q, idx) => (
+            <div key={idx} className="mb-4">
+              <label className="block text-white mb-1">{q.questionText}</label>
+              <input
+                type={q.fieldType || 'text'}
+                className="w-full p-2 border text-black border-gray-300 rounded"
+                onChange={(e) => handleIntroChange(q.questionText, e.target.value)}
+                required={q.required}
+              />
+            </div>
+          ))}
+        </div>
 
-            <select
-              value={q.questionType}
-              onChange={(e) => handleTypeChange(idx, e.target.value)}
-              className="w-full p-2 mb-2 rounded bg-gray-900 border border-gray-600"
-            >
-              <option value="radio">Single Choice</option>
-              <option value="checkbox">Multiple Choice</option>
-              <option value="text">Text Answer</option>
-            </select>
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Survey Questions</h2>
+          {survey.questions.map((q) => {
+            const spokenWords = transcript.toLowerCase().split(' ');
+            const words = q.questionText.split(' ');
+            const selectedOptions = responses[q._id] || [];
 
-            {q.questionType !== 'text' && (
-              <>
-                {q.options.map((opt, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                    <input
-                      type="text"
-                      value={opt}
-                      placeholder={`Option ${i + 1}`}
-                      onChange={(e) => handleOptionChange(idx, i, e.target.value)}
-                      className="w-full p-2 rounded bg-gray-900 border border-gray-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleOptionDelete(idx, i)}
-                      className="text-red-400 text-sm"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-                {q.options.length < 8 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = [...questions];
-                      updated[idx].options.push('');
-                      setQuestions(updated);
-                    }}
-                    className="text-blue-400 text-sm mt-1"
-                  >
-                    + Add Option
-                  </button>
+            return (
+              <div key={q._id} className="mb-6 p-4 border rounded shadow">
+                <div className="mb-2 font-medium text-white text-lg">
+                  {words.map((word, index) => {
+                    const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const isHighlighted = spokenWords.includes(normalized);
+                    return (
+                      <span key={index} className={`px-1 rounded ${isHighlighted ? 'bg-yellow-400' : ''}`}>{word} </span>
+                    );
+                  })}
+                </div>
+
+                {!unlockedQuestions.includes(q._id) ? (
+                  <div className="italic text-yellow">Speak the question to unlock</div>
+                ) : q.questionType === 'text' ? (
+                  <textarea
+                    rows={3}
+                    className="w-full p-2 border rounded border-black text-black"
+                    placeholder="Type your answer..."
+                    value={responses[q._id] || ''}
+                    onChange={(e) => handleOptionSelect(q._id, e.target.value)}
+                  />
+                ) : (
+                  q.options.map((opt, idx) => {
+                    const selected = q.questionType === 'checkbox'
+                      ? selectedOptions.includes(opt)
+                      : responses[q._id] === opt;
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-2 border rounded mb-2 cursor-pointer ${
+                          selected ? 'bg-green-700 border-blue-400' : 'border-gray-300 bg-white font-black text-stone-900'
+                        }`}
+                        onClick={() => handleOptionSelect(q._id, opt, q.questionType)}
+                      >
+                        {opt}
+                      </div>
+                    );
+                  })
                 )}
-              </>
-            )}
-
-            {idx > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  const updated = [...questions];
-                  updated.splice(idx, 1);
-                  setQuestions(updated);
-                }}
-                className="text-red-500 text-sm mt-2"
-              >
-                Delete Question
-              </button>
-            )}
-          </div>
-        ))}
+              </div>
+            );
+          })}
+        </div>
 
         <button
-          type="button"
-          onClick={handleAddQuestion}
-          className="mb-6 text-sm text-blue-400"
-        >
-          + Add Survey Question
-        </button>
-
-        {/* Submit Button */}
-        <button
+          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded transition disabled:opacity-50"
-          disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create Survey'}
+          Submit Survey
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default SurveyVoicePage;
