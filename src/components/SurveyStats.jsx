@@ -15,7 +15,7 @@ const SurveyStatsWithNames = () => {
       try {
         setIsLoading(true);
         const res = await axios.get(
-          'http://localhost:5000/surveys/response-stats',
+          'https://survey-backend-4gdj.onrender.com/surveys/response-stats',
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log('Stats API response:', res.data);

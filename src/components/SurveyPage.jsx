@@ -81,7 +81,7 @@ const SurveyVoicePage = () => {
   const fetchSurvey = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/surveys/${surveyId}`, {
+      const res = await axios.get(`https://survey-backend-4gdj.onrender.com/surveys/${surveyId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSurvey(res.data.data || res.data);
@@ -347,7 +347,7 @@ const SurveyVoicePage = () => {
     };
 
     try {
-      await axios.post('http://localhost:5000/surveys/survey-responses', payload, {
+      await axios.post('https://survey-backend-4gdj.onrender.com/surveys/survey-responses', payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert('Responses submitted successfully!');

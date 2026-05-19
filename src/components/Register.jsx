@@ -20,7 +20,7 @@ const Register = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/auth/register",
+        "https://survey-backend-4gdj.onrender.com/auth/register",
         user
       );
       alert("Registration successful!");

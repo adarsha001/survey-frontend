@@ -21,7 +21,7 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/auth/login",
+        "https://survey-backend-4gdj.onrender.com/auth/login",
         user
       );
       await storeToken(res.data.token);

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './context/Auth';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://survey-backend-4gdj.onrender.com';
 
 export default function SurveyForm() {
   const [title, setTitle] = useState('');

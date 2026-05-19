@@ -15,7 +15,7 @@ const Surveyresponse = () => {
     const fetchSurveys = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:5000/surveys');
+        const res = await axios.get('https://survey-backend-4gdj.onrender.com/surveys');
         setSurveys(res.data.data);
         console.log(res.data.data)
       } catch (err) {

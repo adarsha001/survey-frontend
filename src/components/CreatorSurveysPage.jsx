@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/Auth';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://survey-backend-4gdj.onrender.com';
 
 const CreatorSurveysPage = () => {
   const { token, isAuthenticated, user } = useAuth();
