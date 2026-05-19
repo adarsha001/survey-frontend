@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './context/Auth';
 
-const API_URL = 'https://survey-backend-vugm.onrender.com';
+const API_URL = 'http://localhost:5000';
 
 export default function SurveyForm({ mode = 'create' }) {
   const [title, setTitle] = useState('');

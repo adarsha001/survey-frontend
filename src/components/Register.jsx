@@ -20,7 +20,7 @@ const Register = () => {
 
     try {
       const res = await axios.post(
-        "https://survey-backend-vugm.onrender.com/auth/register",
+        "http://localhost:5000/auth/register",
         user
       );
       alert("Registration successful!");

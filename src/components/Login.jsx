@@ -21,7 +21,7 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        "https://survey-backend-vugm.onrender.com/auth/login",
+        "http://localhost:5000/auth/login",
         user
       );
       await storeToken(res.data.token);

@@ -15,7 +15,7 @@ const SurveyStatsWithNames = () => {
       try {
         setIsLoading(true);
         const res = await axios.get(
-          'https://survey-backend-vugm.onrender.com/surveys/response-stats',
+          'http://localhost:5000/surveys/response-stats',
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log('Stats API response:', res.data);

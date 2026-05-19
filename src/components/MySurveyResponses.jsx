@@ -15,7 +15,7 @@ const MySurveyResponses = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          'https://survey-backend-vugm.onrender.com/surveys/all-responses',
+          'http://localhost:5000/surveys/all-responses',
           {
             headers: { Authorization: `Bearer ${token}` },
           }
