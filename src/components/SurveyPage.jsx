@@ -14,14 +14,17 @@ import {
   FaPaperPlane,
   FaSpinner,
   FaUserCheck,
-  FaFileAlt
+  FaFileAlt,
+  FaExclamationTriangle
 } from 'react-icons/fa';
 
 const SurveyVoicePage = () => {
   const { surveyId } = useParams();
   const navigate = useNavigate();
+  const { token, isAuthenticated } = useAuth();
   const [survey, setSurvey] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
   const [responses, setResponses] = useState({});
   const [introResponses, setIntroResponses] = useState({});
   const [unlockedQuestions, setUnlockedQuestions] = useState([]);
@@ -32,9 +35,24 @@ const SurveyVoicePage = () => {
   const [audioLevel, setAudioLevel] = useState(0);
   const recognitionRef = useRef(null);
   const isListeningRef = useRef(false);
-  const { token } = useAuth();
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setAuthError(true);
+      setLoading(false);
+      // Redirect to login after 3 seconds
+      const timer = setTimeout(() => {
+        navigate('/login', { state: { from: `/survey/${surveyId}`, message: 'Please login to take this survey' } });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, token, navigate, surveyId]);
 
   useEffect(() => {
+    // Only fetch survey if authenticated
+    if (!isAuthenticated || !token) return;
+
     const fetchSurvey = async () => {
       try {
         const res = await axios.get(`https://survey-backend-4gdj.onrender.com/surveys/${surveyId}`, {
@@ -44,11 +62,15 @@ const SurveyVoicePage = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching survey:', err.message);
-        navigate('/');
+        if (err.response?.status === 401) {
+          navigate('/login', { state: { from: `/survey/${surveyId}`, message: 'Session expired. Please login again.' } });
+        } else {
+          navigate('/');
+        }
       }
     };
     fetchSurvey();
-  }, [surveyId, token, navigate]);
+  }, [surveyId, token, navigate, isAuthenticated]);
 
   useEffect(() => {
     if (!survey || !transcript) return;
@@ -168,6 +190,12 @@ const SurveyVoicePage = () => {
   };
 
   const handleSubmit = async () => {
+    // Check authentication before submitting
+    if (!isAuthenticated || !token) {
+      navigate('/login', { state: { from: `/survey/${surveyId}`, message: 'Please login to submit your responses' } });
+      return;
+    }
+
     const payload = {
       introResponses: Object.entries(introResponses).map(([key, value]) => ({
         questionText: key,
@@ -189,7 +217,11 @@ const SurveyVoicePage = () => {
       navigate('/');
     } catch (error) {
       console.error('Error submitting survey:', error);
-      alert('Submission failed.');
+      if (error.response?.status === 401) {
+        navigate('/login', { state: { from: `/survey/${surveyId}`, message: 'Session expired. Please login again.' } });
+      } else {
+        alert('Submission failed. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -201,11 +233,38 @@ const SurveyVoicePage = () => {
     return (answeredQuestions / totalQuestions) * 100;
   };
 
+  // Loading state
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
       <div className="text-center">
         <FaSpinner className="animate-spin text-4xl text-blue-500 mx-auto mb-4" />
         <p className="text-white text-lg">Loading survey...</p>
+      </div>
+    </div>
+  );
+
+  // Authentication error state
+  if (authError) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+      <div className="bg-red-500/10 backdrop-blur-sm rounded-2xl p-8 border border-red-500/50 max-w-md text-center">
+        <FaExclamationTriangle className="text-5xl text-red-400 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+        <p className="text-gray-300 mb-6">Please login to take this survey</p>
+        <div className="space-y-3">
+          <button
+            onClick={() => navigate('/login', { state: { from: `/survey/${surveyId}` } })}
+            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-200"
+          >
+            Go to Login
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-all duration-200"
+          >
+            Back to Home
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-4">Redirecting to login in 3 seconds...</p>
       </div>
     </div>
   );
